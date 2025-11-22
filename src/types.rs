@@ -111,25 +111,34 @@ pub enum Screen {
     pub Result,
 }
 
-
+#[derive(Default)]
+pub enum State {
+#[default]
+    Running,
+    Done
+}
 pub struct App {
     pub screen: Screen,
     pub memory: Memory,
+    pub state: State,
 }
 
 impl App {
     pub fn switch_screen(&mut self, screen: Screen) {
-        self.screen = screen
+        self.screen = screen;
     }
 
     pub fn memory_edit(&mut self, key: u8, value: String) {
         match key {
             1 => todo!(),
             _ => todo!()
-        }
+        };
     }
 
     pub fn get_memory(&self, key: u8) -> String {
         self.memory[key]
+    }
+    pub fn shutdown(&mut self) {
+        self.state = State::Done;
     }
 }
