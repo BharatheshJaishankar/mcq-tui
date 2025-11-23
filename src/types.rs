@@ -117,10 +117,12 @@ pub enum State {
     Running,
     Done
 }
+
 pub struct App {
     pub screen: Screen,
-    pub memory: Memory,
+    pub memory: Option<Vec<String>>,
     pub state: State,
+    pub mcq: Option<Mcq>
 }
 
 impl App {
@@ -129,10 +131,7 @@ impl App {
     }
 
     pub fn memory_edit(&mut self, key: u8, value: String) {
-        match key {
-            1 => todo!(),
-            _ => todo!()
-        };
+        self.memory[key] = value;
     }
 
     pub fn get_memory(&self, key: u8) -> String {
