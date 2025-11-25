@@ -8,43 +8,55 @@ use ratatui::Frame;
 use std::io::Result;
 use std::time::Duration;
 
+
+/// App Struct which is the foundation of the TUI
 #[derive(Default)]
 pub struct App {
+    /// There can be state which denotes how the application should run
     pub state: State,
+    /// Changes the screen
     pub screen: Screen,
+    /// Contains the Mcq struct
     pub mcq: Option<Mcq>,
 }
 
+/// Contains the Screen's respective messages
 pub enum AppMessage {
     McqScreen(McqMessage),
     StatisticsScreen(StatisticsMessage),
 }
 
+/// The state of the app
 #[derive(Debug, Default, PartialEq, Eq)]
 pub enum State {
+    /// Denotes app is running
     #[default]
     Running,
+    /// TUI is quit
     Shutdown,
 }
 
 #[derive(Default)]
 pub enum Screen {
+    /// Switches to Mcq Screen
     #[default]
     McqScreen,
+    /// Switches to Statistics Screen
     StatisticsScreen,
 }
 
 pub trait ScreenTrait {
+    /// This renderes the TUI, it takes a frame and the App struct
     fn view(model: &mut App, frame: &mut Frame) {
         todo!()
     }
-
+    /// It takes from KeyEvent which is coming from handle_events which is translated to the corresponding Message
     fn handle_key(key: event::KeyEvent) -> Option<AppMessage> {
         match key.code {
             _ => None,
         }
     }
-
+    /// Takes a nessage and does work with it
     fn update(model: &mut App, msg: AppMessage) -> Option<AppMessage> {
         match msg {
             _ => todo!(),

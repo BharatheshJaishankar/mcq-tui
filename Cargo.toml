@@ -2,7 +2,18 @@
 name = "mcq"
 version = "0.1.0"
 edition = "2024"
+author = ["Bharathesh Jaishankar <bharathesjaishankar@gmail.com>"]
+description = "A Rust TUI mcq app built with Ratatui"
+readme = "README.md"
+license = "MIT
 
 [dependencies]
 crossterm = "0.29.0"
 ratatui = "0.29.0"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1
+opt-level = "z"
+panic = "abort"

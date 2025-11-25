@@ -5,12 +5,15 @@ use ratatui::{
 };
 
 use crate::types::{App, AppMessage, Screen, ScreenTrait};
-
+/// Contains Mcq Screen messages
 pub enum McqMessage {
+    /// Sends the input of the user, to evaluate the question
     Next(u8),
+    /// Exits the app
     Quit,
 }
 
+/// Screen Trait is implemented on this struct
 pub struct McqScreen {}
 
 impl ScreenTrait for McqScreen {

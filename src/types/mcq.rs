@@ -10,6 +10,7 @@ pub struct Question {
     pub correct: u8,
     /// An optional type, used for later storing the user selected option for analysis
     pub selected: Option<u8>,
+    /// Checks wether the user has seen the answer or not
     pub checked: bool,
 }
 
@@ -38,6 +39,7 @@ pub struct Mcq {
 }
 
 impl Mcq {
+    /// Initializes a  new Mcq struct
     pub fn new(vec: Vec<Question>) -> Self {
         Self {
             index: 0,
@@ -46,7 +48,7 @@ impl Mcq {
             incorrect_no: 0,
         }
     }
-    /// Increases the index by one, and also evaluates the answer
+    /// Evaluates the answer
     pub fn next(&mut self, answer: u8) {
         if self.questions[self.index as usize].evaluate(answer) {
             self.correct_no += 1;

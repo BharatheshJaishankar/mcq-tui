@@ -2,10 +2,13 @@ use ratatui::widgets::{Block, Borders, Paragraph};
 
 use crate::types::{App, AppMessage, ScreenTrait};
 
+/// Statistics Screen Message Enum
 pub enum StatisticsMessage {
+    /// Quits the App
     Quit,
 }
 
+/// This struct is responsible for the implementations of ScreenTrait
 pub struct StatisticsScreen {}
 
 impl ScreenTrait for StatisticsScreen {
