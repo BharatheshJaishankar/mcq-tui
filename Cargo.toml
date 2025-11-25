@@ -5,7 +5,7 @@ edition = "2024"
 author = ["Bharathesh Jaishankar <bharathesjaishankar@gmail.com>"]
 description = "A Rust TUI mcq app built with Ratatui"
 readme = "README.md"
-license = "MIT
+license = "MIT"
 
 [dependencies]
 crossterm = "0.29.0"
