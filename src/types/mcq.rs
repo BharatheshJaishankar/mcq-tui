@@ -1,5 +1,4 @@
 use std::io;
-
 /// Question struct is the foundation of the app, any question generated should be in this format
 #[derive(Debug)]
 pub struct Question {
@@ -11,13 +10,13 @@ pub struct Question {
     pub correct: u8,
     /// An optional type, used for later storing the user selected option for analysis
     pub selected: Option<u8>,
-    pub explanation: Option<String>
+    pub checked: bool,
 }
 
 impl Question {
     /// Evaluate the correct answer by checking with index of the option
     pub fn evaluate(&self, index: u8) -> bool {
-        if self.correct == index - 1 {
+        if self.correct == index {
             return true;
         } else {
             return false;
@@ -54,9 +53,8 @@ impl Mcq {
         } else {
             self.incorrect_no += 1;
         }
-        self.index += 1;
     }
-    
+
     pub fn print(&mut self) {
         let len = self.questions.len() as u8 - 1;
         loop {
@@ -83,7 +81,7 @@ impl Mcq {
         }
     }
 
-    fn parse_ai(prompt: String) -> Vec<Question> {
+    /* fn parse_ai(prompt: String) -> Vec<Question> {
         let response = "prompt";
         let mut db: Vec<Question> = Vec::new();
         let split_question: Vec<&str> = response.split("\n\n").collect();
@@ -103,41 +101,5 @@ impl Mcq {
             });
         }
         db
-    }
-}
-
-pub enum Screen {
-    pub Mcq,
-    pub Result,
-}
-
-#[derive(Default)]
-pub enum State {
-#[default]
-    Running,
-    Done
-}
-
-pub struct App {
-    pub screen: Screen,
-    pub memory: Option<Vec<String>>,
-    pub state: State,
-    pub mcq: Option<Mcq>
-}
-
-impl App {
-    pub fn switch_screen(&mut self, screen: Screen) {
-        self.screen = screen;
-    }
-
-    pub fn memory_edit(&mut self, key: u8, value: String) {
-        self.memory[key] = value;
-    }
-
-    pub fn get_memory(&self, key: u8) -> String {
-        self.memory[key]
-    }
-    pub fn shutdown(&mut self) {
-        self.state = State::Done;
-    }
+    } */
 }

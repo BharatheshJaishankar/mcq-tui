@@ -1,64 +1,149 @@
-use ratatui::{crossterm::event::{KeyEvent, KeyCode, Event},
-wigets::Paragraph, Frame};
+use ratatui::{
+    layout::{Constraint, Direction, Layout},
+    style::{Color, Style, Stylize},
+    widgets::{Block, Borders, Paragraph},
+};
 
-enum Message {
+use crate::types::{App, AppMessage, Screen, ScreenTrait};
+
+pub enum McqMessage {
     Next(u8),
+    Quit,
 }
 
-struct McqScreen {
-    current_selected: String,
-}
+pub struct McqScreen {}
 
-impl McqScreen {
-    fn handle_key(key: KeyEvent) -> Option<Message> {
-        match key.code {
-            KeyCode::Char('1') => Some(Message(Next(1)),
-            KeyCode::Char('2') => Some(Message(Next(2)),
-            KeyCode::Char('3') => Some(Message(Next(3)),
-            KeyCode::Char('4') => Some(Message(Next(4)),
-        };
-    }
+impl ScreenTrait for McqScreen {
+    fn view(model: &mut App, frame: &mut ratatui::Frame) {
+        // Split screen vertically: question (top) and options (bottom)
+        let layout = Layout::new(Direction::Vertical, Constraint::from_percentages([40, 60]))
+            .split(frame.area());
 
-fn update(&mut self, msg: Message, app: &mut App) {
-match msg {
-    Message::Next(n) => {
-        app.mcq.next(n + 1);
-    }
-}
-}
+        // Only render if we have an MCQ loaded
+        if let Some(mcq) = &model.mcq {
+            if let Some(question) = mcq.questions.get(mcq.index as usize) {
+                // Render the question text
+                let question_widget = Paragraph::new(question.question.clone()).block(
+                    Block::default()
+                        .title(format!("Question {}", mcq.index + 1))
+                        .borders(Borders::ALL),
+                );
+                frame.render_widget(question_widget, layout[0]);
 
-fn handle_event(app: &App) {
- if event::poll(Duration::from_millis(250))? {
-        if let Event::Key(key) = event::read()? {
-            if key.kind == event::KeyEventKind::Press {
-                return Ok(handle_key(key));
+                // Split bottom half vertically into two rows
+                let rows = Layout::new(Direction::Vertical, Constraint::from_percentages([50, 50]))
+                    .split(layout[1]);
+
+                // Each row split horizontally into two columns
+                let first_row = Layout::new(
+                    Direction::Horizontal,
+                    Constraint::from_percentages([50, 50]),
+                )
+                .split(rows[0]);
+                let second_row = Layout::new(
+                    Direction::Horizontal,
+                    Constraint::from_percentages([50, 50]),
+                )
+                .split(rows[1]);
+
+                // Render options (assuming exactly 4)
+                let option_widgets = question
+                    .options
+                    .iter()
+                    .enumerate()
+                    .map(|(i, text)| {
+                        let style = Style::default();
+                        if question.checked == false {
+                            Paragraph::new(text.clone()).style(style).block(
+                                Block::default()
+                                    .title(format!("Option {}", i + 1))
+                                    .borders(Borders::ALL),
+                            )
+                        } else {
+                            if question.correct == (i + 1) as u8 {
+                                Paragraph::new(text.clone())
+                                    .style(style.bg(Color::Blue))
+                                    .block(
+                                        Block::default()
+                                            .title(format!("Option {}", i + 1))
+                                            .borders(Borders::ALL),
+                                    )
+                            } else {
+                                if question.selected == Some((i + 1) as u8) {
+                                    Paragraph::new(text.clone())
+                                        .style(style.bg(Color::Red))
+                                        .block(
+                                            Block::default()
+                                                .title(format!("Option {}", i + 1))
+                                                .borders(Borders::ALL),
+                                        )
+                                } else {
+                                    Paragraph::new(text.clone()).style(style).block(
+                                        Block::default()
+                                            .title(format!("Option {}", i + 1))
+                                            .borders(Borders::ALL),
+                                    )
+                                }
+                            }
+                        }
+                    })
+                    .collect::<Vec<_>>();
+
+                // Place options in grid
+                frame.render_widget(option_widgets[0].clone(), first_row[0]);
+                frame.render_widget(option_widgets[1].clone(), first_row[1]);
+                frame.render_widget(option_widgets[2].clone(), second_row[0]);
+                frame.render_widget(option_widgets[3].clone(), second_row[1]);
             }
+        } else {
+            // If no MCQ loaded, show placeholder
+            let placeholder = Paragraph::new("No question loaded")
+                .block(Block::default().title("Info").borders(Borders::ALL));
+            frame.render_widget(placeholder, layout[0]);
         }
     }
 
-    fn view(app: &mut App, frame: &mut Frame) {
-       let layout = Layout::new(Direction::Vertical, Constraint::from_percentages([50, 50]))
-           .split(frame.area());
-       let paragraph = Paragraph::new(app.questions[app.index].question);
-       frame.render_widget(paragraph, layout[0]);
+    fn handle_key(key: crossterm::event::KeyEvent) -> Option<AppMessage> {
+        match key.code {
+            crossterm::event::KeyCode::Char('1') => {
+                Some(AppMessage::McqScreen(McqMessage::Next(1)))
+            }
+            crossterm::event::KeyCode::Char('2') => {
+                Some(AppMessage::McqScreen(McqMessage::Next(2)))
+            }
+            crossterm::event::KeyCode::Char('3') => {
+                Some(AppMessage::McqScreen(McqMessage::Next(3)))
+            }
+            crossterm::event::KeyCode::Char('4') => {
+                Some(AppMessage::McqScreen(McqMessage::Next(4)))
+            }
+            crossterm::event::KeyCode::Char('q') => Some(AppMessage::McqScreen(McqMessage::Quit)),
+            _ => None,
+        }
+    }
 
-       let horizontal = Layout::new(Direction::Vertical, Constrain::from_percentages([50, 50]))
-       .split(layout[1]);
-
-       let first_split = Layout::new(Direction::Horizontal, Contraint::from_percentages([50, 50]))
-       .split(horizontal[0]);
-       let second_split = Layout::new(Direction::Horizontal, Contraint::from_percentages([50, 50]))
-       .split(horizontal[1]);
-
-       let option_1 = Paragraph::new(aapp.questions[app.index].options[0]);      
-       let option_2 = Paragraph::new(aapp.questions[app.index].options[1]);
-       let option_3 = Paragraph::new(aapp.questions[app.index].options[2]);
-       let option_4 = Paragraph::new(aapp.questions[app.index].options[3]);
-
-       frame.render_widget(option_1,first_split[0]);
-       frame.render_widget(option_2,first_split[1]);
-       frame.render_widget(option_3,second_split[0]);
-       frame.render_widget(option_4,second_split[1]);
-       
+    fn update(model: &mut App, msg: AppMessage) -> Option<AppMessage> {
+        match msg {
+            AppMessage::McqScreen(McqMessage::Next(index)) => {
+                if let Some(mcq) = &mut model.mcq {
+                    if mcq.questions[mcq.index as usize].checked == false {
+                        mcq.questions[mcq.index as usize].selected = Some(index);
+                        mcq.next(index);
+                        mcq.questions[mcq.index as usize].checked = true;
+                    } else {
+                        mcq.questions[mcq.index as usize].checked = false;
+                        mcq.index += 1;
+                        if mcq.index == mcq.questions.len() as u8 {
+                            model.screen = Screen::StatisticsScreen;
+                        }
+                    }
+                }
+            }
+            AppMessage::McqScreen(McqMessage::Quit) => {
+                model.state = crate::types::State::Shutdown;
+            }
+            _ => std::todo!(),
+        };
+        None
     }
 }

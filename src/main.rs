@@ -1,55 +1,69 @@
+mod screen;
 mod types;
 
-fn main() -> color_eyre::Result<()> {
-    tui::install_panic_hook();
-let mut terminal = tui::init_terminal()?;
-let mut app = types::App::new();
+use crate::types::mcq::{Mcq, Question};
+use crate::types::{App, Screen, State};
+use ratatui::{
+    Terminal,
+    backend::CrosstermBackend,
+    crossterm::{
+        ExecutableCommand,
+        terminal::{EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode},
+    },
+};
+use std::io::{Result, stdout};
 
-while app.state != State::Done {
-    terminal.draw(|f| app.screen.view(&mut app, f))?;
-    let mut current_msq = app.screen.handle_event(&app)?;
-    
-    while current_msg.is_some() {
-        current_msg = app.screen.update(&mut app, current_msg.unwrap());
-    }
-}
+fn main() -> Result<()> {
+    let args = std::env::args().collect::<Vec<String>>();
+    let prompt = args.get(1).expect("Please provide a File path");
 
-tui::restore_terminal()?;
-Ok(())
-}
+    let mcq = Mcq::new(parse_file(prompt.to_string()));
 
-mod tui {
-    use ratatui::{
-        backend::{Backend, CrosstermBackend},
-        crossterm::{
-            terminal::{
-                disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen,
-            },
-            ExecutableCommand,
-        },
-        Terminal,
+    stdout().execute(EnterAlternateScreen)?;
+    enable_raw_mode()?;
+    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+    terminal.clear()?;
+
+    let mut model = App {
+        state: State::Running,
+        screen: Screen::McqScreen,
+        mcq: Some(mcq),
     };
-    use std::{io::stdout, panic};
 
-    pub fn init_terminal() -> color_eyre::Result<Terminal<impl Backend>> {
-        enable_raw_mode()?;
-        stdout().execute(EnterAlternateScreen)?;
-        let terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-        Ok(terminal)
+    while model.state != State::Shutdown {
+        terminal.draw(|f| model.view(f))?;
+
+        let mut current_msg = model.handle_event()?;
+
+        while current_msg.is_some() {
+            current_msg = model.update(current_msg.unwrap());
+        }
     }
 
-    pub fn restore_terminal() -> color_eyre::Result<()> {
-        stdout().execute(LeaveAlternateScreen)?;
-        disable_raw_mode()?;
-        Ok(())
-    }
+    stdout().execute(LeaveAlternateScreen)?;
+    disable_raw_mode()?;
+    Ok(())
+}
 
-    pub fn install_panic_hook() {
-        let original_hook = panic::take_hook();
-        panic::set_hook(Box::new(move |panic_info| {
-            stdout().execute(LeaveAlternateScreen).unwrap();
-            disable_raw_mode().unwrap();
-            original_hook(panic_info);
-        }));
+fn parse_file(prompt: String) -> Vec<Question> {
+    let file = std::fs::read_to_string(prompt).expect("Unable to read file");
+    let questions = file.split("|").collect::<Vec<&str>>();
+    let mut db: Vec<Question> = Vec::new();
+    for question in questions {
+        let options = question.split("#").collect::<Vec<&str>>();
+        let try_options = vec![
+            options[1].to_string(),
+            options[2].to_string(),
+            options[3].to_string(),
+            options[4].to_string(),
+        ];
+        db.push(Question {
+            question: options[0].to_string(),
+            options: try_options,
+            correct: options[5].parse::<u8>().unwrap(),
+            selected: None,
+            checked: false,
+        });
     }
-}    
+    db
+}
