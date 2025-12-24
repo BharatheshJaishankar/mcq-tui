@@ -1,3 +1,17 @@
+//! An app designed for fast mcq retention and solving.
+//!
+//! # Philosophy
+//! This app aims to help the user gain the most of his time from
+//! solving mcq's which are:
+//! * Avoid using mouse to select option.
+//! * Avoid using enter key to enter a question.
+//! * Using only 4 keys mapped to 4 fingers for each option.
+//!
+
+#![warn(clippy::perf)]
+#![warn(clippy::style)]
+#![warn(clippy::complexity)]
+
 mod screen;
 mod types;
 

@@ -1,7 +1,7 @@
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Style, Stylize},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Borders, Paragraph, Wrap},
 };
 
 use crate::types::{App, AppMessage, Screen, ScreenTrait};
@@ -30,7 +30,7 @@ impl ScreenTrait for McqScreen {
                     Block::default()
                         .title(format!("Question {}", mcq.index + 1))
                         .borders(Borders::ALL),
-                );
+                ).wrap(Wrap {trim: true});
                 frame.render_widget(question_widget, layout[0]);
 
                 // Split bottom half vertically into two rows
@@ -61,7 +61,7 @@ impl ScreenTrait for McqScreen {
                                 Block::default()
                                     .title(format!("Option {}", i + 1))
                                     .borders(Borders::ALL),
-                            )
+                            ).wrap(Wrap {trim: true})
                         } else {
                             if question.correct == (i + 1) as u8 {
                                 Paragraph::new(text.clone())
@@ -70,7 +70,7 @@ impl ScreenTrait for McqScreen {
                                         Block::default()
                                             .title(format!("Option {}", i + 1))
                                             .borders(Borders::ALL),
-                                    )
+                                    ).wrap(Wrap {trim: true})
                             } else {
                                 if question.selected == Some((i + 1) as u8) {
                                     Paragraph::new(text.clone())
@@ -79,13 +79,13 @@ impl ScreenTrait for McqScreen {
                                             Block::default()
                                                 .title(format!("Option {}", i + 1))
                                                 .borders(Borders::ALL),
-                                        )
+                                        ).wrap(Wrap {trim: true})
                                 } else {
                                     Paragraph::new(text.clone()).style(style).block(
                                         Block::default()
                                             .title(format!("Option {}", i + 1))
                                             .borders(Borders::ALL),
-                                    )
+                                    ).wrap(Wrap {trim: true})
                                 }
                             }
                         }
